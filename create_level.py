@@ -27,6 +27,10 @@ def create_level(robot, level):
 
     elif level == 2:  # Switch Rooms
         if RANDOM_START:
+            # robot.create_level(level=2,
+            #     world={'width': 5, 'height': 5}, 
+            #     robot={'x': 4, 'y': 1, 'direction': 'UP', 'energy': 101},
+            #     wall_gap={'x': 3, 'y': 1}) 
             robot.create_level(level=2)
         else:
             robot.create_level(level=2,

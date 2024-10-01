@@ -17,7 +17,7 @@ def show_duo_names():
 def script_0_demo(robot):
     # demo script to show the capabilities of the robot
     # read the assignment instructions for details
-        
+
     # demo of scans
     direction = robot.scan_direction()
     print("current robot direction:", direction)
@@ -88,19 +88,7 @@ def goForward(robot, steps):
     for step in range(steps):
         robot.step_forward()
 
-def script_1(robot):   # Walk around the World
-    # your solution here:
-    # the robot first goes to one of the corners.
-    # •the robot next walks around the World along the outer wall and stops in the corner where it started.
-    # •the robot does not crash into a wall
-    
-    # direction = robot.scan_direction()
-    # obstacle = robot.scan_object_ahead()
-    # steps = robot.scan_steps_ahead()
-    # energy = robot.scan_energy()
-    # print (direction, obstacle, steps, energy)
-
-    # make the robot facing down
+def makeTheRobotFacingDown(robot, direction):
     direction = robot.scan_direction()
     if (direction == "RIGHT"):
         robot.turn_right()
@@ -110,53 +98,133 @@ def script_1(robot):   # Walk around the World
     if (direction == "LEFT"):
         robot.turn_left()
 
-    # # go down
+def script_1(robot):   # Walk around the World
+    # your solution here:
+    # the robot first goes to one of the corners.
+    # •the robot next walks around the World along the outer wall and stops in the corner where it started.
+    # •the robot does not crash into a wall
+
+    # direction = robot.scan_direction()
+    # obstacle = robot.scan_object_ahead()
+    # steps = robot.scan_steps_ahead()
+    # energy = robot.scan_energy()
+    # print (direction, obstacle, steps, energy)
+    WALLS = 4
+    # make the robot facing down
+    initialDirection = robot.scan_direction()
+    makeTheRobotFacingDown(robot, initialDirection)
+
+    # go down
     firstSteps = robot.scan_steps_ahead()
     goForward(robot, firstSteps)
 
-    # go to left
+    # go to the left bottom, this is our starting corner.
     robot.turn_right()
     secondSteps = robot.scan_steps_ahead()
     goForward(robot, secondSteps)
 
-    # go up
-    robot.turn_right()
-    thirdSteps = robot.scan_steps_ahead()
-    goForward(robot, thirdSteps)
+    # TO DO: later on, you can improve it by choosing to select the coner with shortest distance at the bottom.
 
-    # go to right
-    robot.turn_right()
-    fourthSteps = robot.scan_steps_ahead()
-    goForward(robot, fourthSteps)
-
-    # go down
-    robot.turn_right()
-    fifthSteps = robot.scan_steps_ahead()
-    goForward(robot, fifthSteps)
-
-    # go to left
-    robot.turn_right()
-    sixthSteps = robot.scan_steps_ahead()
-    goForward(robot, sixthSteps)
-
-    sum = thirdSteps+fourthSteps+fifthSteps+sixthSteps+4
+    sum = 0
+    for wall in range(0, WALLS):
+        robot.turn_right()
+        curForwardSteps = robot.scan_steps_ahead()
+        goForward(robot, curForwardSteps)
+        sum += curForwardSteps+1
     print ("Total steps to walk around the world: ", sum)
 
     # check the distance between the wall and the robot.
     # movie that much distance to the wall.
     # then either turn left or right.
-
-    # robot.
     return # end of script_1
+
+def checkIfDistanceIsEqual(distances):
+    if (len(distances) == 0):
+        return True
+    if (distances.count(distances[0]) == len(distances)):
+        return True
+    return False
+
+def turnLeft(robot, steps):
+    for step in range(steps):
+        robot.turn_left()
+
+def turnRight(robot, steps):
+    for step in range(steps):
+        robot.turn_right()
+
+def searchRoom(robot, steps, goDown=True):
+    if (goDown==False):
+        steps = steps + 1
+
+    index = 0
+    left = []
+    right = []
+
+    for step in range(steps):
+        index += 1
+        turnLeft(robot, 1)
+        left.append(robot.scan_steps_ahead())
+        turnRight(robot, 2)
+        right.append(robot.scan_steps_ahead())
+        turnLeft(robot, 1)
+        if (step != steps):
+            goForward(robot, 1)
+
+    leftSide = checkIfDistanceIsEqual(left)
+    rightSide = checkIfDistanceIsEqual(right)
+
+    distance = 0
+    maxValue = 0
+    if (leftSide == False):
+        distance = left.index(max(left))
+        maxValue = max(left)
+    if (rightSide == False):
+        distance = right.index(max(right))
+        maxValue = max(right)  
+    if (leftSide == False or rightSide == False):
+        turnRight(robot, 2)
+        if (goDown == True):
+            goForward(robot, index-distance)
+        if (goDown == False):
+            goForward(robot, (index-distance)-1)
+        if (leftSide == False):
+            turnRight(robot, 1)
+        if (rightSide == False):
+            turnLeft(robot, 1)
+        goForward(robot, maxValue)
+        return True
+    return False
 
 
 def script_2(robot):  # Switch Rooms
     # your solution here:
     # the robot walks from the room where it was created to the other room.
-    # •the robot has to stop moving/turning in the other room (the exact location
-    # is not important).
-    # •the robot does not crash into a wall
+    # the robot has to stop moving/turning in the other room (the exact location is not important).
+    # the robot does not crash into a wall
+    # sometimes it happens that there is no open tile to the other room.
 
+
+    # make the robot facing downwards
+    initialDirection = robot.scan_direction()
+    makeTheRobotFacingDown(robot, initialDirection)
+
+    stepsToBottom = robot.scan_steps_ahead()
+    firstHalfResult = searchRoom(robot, stepsToBottom)
+    
+    if (firstHalfResult == True):
+        print ("found!")
+        return
+    
+    turnRight(robot, 2)
+    stepsToTop = robot.scan_steps_ahead()
+    secondHalfResult = searchRoom(robot, stepsToTop)
+
+    if (secondHalfResult == True):
+        print ("found!")
+        return
+            
+    print ("there is no open tile to the other room!")
     return # end of script_2
 
 

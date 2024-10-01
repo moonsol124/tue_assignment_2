@@ -1,0 +1,14 @@
+distances = []
+
+    for i in range(4):
+        distances.append(robot.scan_steps_ahead())
+        robot.turn_right()
+    
+    side = min(distances)
+    index = distances.index(side)
+
+    for i in range(index):
+        robot.turn_right()
+
+    steps = robot.scan_steps_ahead()
+    
