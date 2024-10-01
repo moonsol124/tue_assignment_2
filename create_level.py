@@ -4,7 +4,7 @@ from robot_world import *
 
 def create_level(robot, level):
 
-    RANDOM_START = False  # change to True for random positions
+    RANDOM_START = True  # change to True for random positions
 
     if level == 0:  # Demo
         if RANDOM_START:

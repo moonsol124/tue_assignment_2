@@ -100,7 +100,17 @@ def script_1(robot):   # Walk around the World
     # energy = robot.scan_energy()
     # print (direction, obstacle, steps, energy)
 
-    # go down
+    # make the robot facing down
+    direction = robot.scan_direction()
+    if (direction == "RIGHT"):
+        robot.turn_right()
+    if (direction == "UP"):
+        for step in range(2):
+            robot.turn_right()
+    if (direction == "LEFT"):
+        robot.turn_left()
+
+    # # go down
     firstSteps = robot.scan_steps_ahead()
     goForward(robot, firstSteps)
 
@@ -142,6 +152,10 @@ def script_1(robot):   # Walk around the World
 
 def script_2(robot):  # Switch Rooms
     # your solution here:
+    # the robot walks from the room where it was created to the other room.
+    # •the robot has to stop moving/turning in the other room (the exact location
+    # is not important).
+    # •the robot does not crash into a wall
 
     return # end of script_2
 
