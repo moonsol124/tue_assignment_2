@@ -1,6 +1,8 @@
 # assignment 2
 
 from asyncio import create_subprocess_shell
+
+from numpy import block
 from robot_world import *
 
 def show_duo_names():
@@ -312,11 +314,102 @@ def script_3(robot): # Where is the Tile
     return # end of script_3
 
 
+def goToBlock(robot, object):
+    if (object=="BLOCK"):
+        distance = robot.scan_steps_ahead()
+        goForward(robot, distance)
+        return True
+    
+    return False
+
+def searchBlock(robot, steps, goDown=True):
+    if (goDown==False):
+        steps = steps + 1
+
+    index = 0
+    for step in range(steps):
+        index += 1
+        turnLeft(robot, 1)
+        isFound = goToBlock(robot, robot.scan_object_ahead().upper())
+        if (isFound):
+            return True
+        else:
+            turnRight(robot, 2)
+            isFound = goToBlock(robot, robot.scan_object_ahead().upper())
+            if (isFound):
+                return True
+            else:
+                turnLeft(robot, 1)
+                if (step != steps):
+                    goForward(robot, 1)
+
+def searchTileSameColumn(robot):
+    object = robot.scan_object_ahead().upper()
+    if (object == "BLOCK"):
+        steps = robot.scan_steps_ahead()
+        goForward(robot, steps)
+        return True
+    return False
+
 def script_4(robot):  # Walk around the Block
+    # the robot first walks to the blue block until they touch.
+    # •the robot then walks around the block in clock-wise direction (while
+    # touching the block) completing exactly one full round.
+    # •the robot does not crash into a wall or the block
     # your solution here:
+    
+    # check where the block is.. from up, down, right, left sides?
+    # same as searching for a tile...
+    # but then you have to check the direction of the robot.    
+
+    blockFound = False
+    # check if there is a block in the same column.
+    # check downwards.
+    if (blockFound == False):
+        makeTheRobotFacingDown(robot)
+        if (searchTileSameColumn(robot)):
+            blockFound = True
+    
+    # check upwards.
+    if (blockFound == False):
+        makeTheRobotFacingUp(robot)
+        if (searchTileSameColumn(robot)):
+            blockFound = True
+
+    # keep searching for the block.
+    # scan downwards
+    if (blockFound == False):
+        makeTheRobotFacingDown(robot)
+        stepsToBottom = robot.scan_steps_ahead()
+        firstHalfResult = searchBlock(robot, stepsToBottom)
+        if (firstHalfResult == True):
+            blockFound = True
+    
+    # scan upwards   
+    if (blockFound == False):
+        turnRight(robot, 2)
+        stepsToTop = robot.scan_steps_ahead()
+        secondHalfResult = searchBlock(robot, stepsToTop, False)
+        if (secondHalfResult == True):
+            blockFound = True
+
+    direction = robot.scan_direction()
+    maxWalkDistance = 8
+    # now walk around the block
+    # the robot faces the block from left, right, top, bottom
+    for step in range(maxWalkDistance):
+        if (step == 0):
+            turnLeft(robot, 1)
+            goForward(robot, 1)
+        elif (step%2 == 1 and step != maxWalkDistance-1):
+            turnRight(robot, 1)
+            goForward(robot, 2)
+        elif (step == maxWalkDistance-1):
+            turnRight(robot, 1)
+            goForward(robot, 1)
+
 
     return # end of script_4
-
 
 def script_5(robot):  # Follow the Tile Path
     # your solution here:

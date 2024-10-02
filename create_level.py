@@ -29,8 +29,8 @@ def create_level(robot, level):
         if RANDOM_START:
             # robot.create_level(level=2,
             #     world={'width': 5, 'height': 5}, 
-            #     robot={'x': 4, 'y': 1, 'direction': 'UP', 'energy': 101},
-            #     wall_gap={'x': 3, 'y': 1}) 
+            #     robot={'x': 4, 'y': 5, 'direction': 'UP', 'energy': 101},
+            #     wall_gap={'x': 3, 'y': 5}) 
             robot.create_level(level=2)
         else:
             robot.create_level(level=2,
@@ -53,6 +53,12 @@ def create_level(robot, level):
 
     elif level == 4:  # walk around the block
         if RANDOM_START:
+            # robot.create_level(level=4,
+            #     world={'width': 12, 'height': 8}, 
+            #     robot={'x': 2, 'y': 5, 'direction': 'UP', 'energy': 101},
+            #     block={'x': 2, 'y': 2},
+            #     tile={'x': 5, 'y': 5},
+            #     wall_gap={'x': 7, 'y': 3}) 
             robot.create_level(level=4)
         else:
             robot.create_level(level=4,
