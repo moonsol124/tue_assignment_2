@@ -40,12 +40,16 @@ def create_level(robot, level):
 
     elif level == 3:  # Where is the Tile?
         if RANDOM_START:
+            # robot.create_level(level=3,
+            #     world={'width': 7, 'height': 8}, 
+            #     robot={'x': 3, 'y': 3, 'direction': 'UP', 'energy': 101},
+            #     tile={'x': 1, 'y': 1})
             robot.create_level(level=3)
         else:
             robot.create_level(level=3,
-                world={'width': 12, 'height': 8}, 
-                robot={'x': 2, 'y': 2, 'direction': 'UP', 'energy': 101},
-                tile={'x': 5, 'y': 5})
+                world={'width': 5, 'height': 5}, 
+                robot={'x': 2, 'y': 5, 'direction': 'UP', 'energy': 101},
+                tile={'x': 4, 'y': 5})
 
     elif level == 4:  # walk around the block
         if RANDOM_START:
