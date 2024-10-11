@@ -2,6 +2,7 @@
 
 from asyncio import create_subprocess_shell
 
+from flair import set_proxies
 from numpy import block
 from robot_world import *
 
@@ -168,6 +169,16 @@ def makeTheRobotFacingUp(robot):
             robot.turn_left()
     if (direction == "right"):
         robot.turn_left()
+
+def makeTheRobotFacingRight(robot):
+    direction = robot.scan_direction()
+    if (direction == "UP"):
+        robot.turn_right()
+    if (direction == "DOWN"):
+        robot.turn_left()
+    if (direction == "LEFT"):
+        turnLeft(robot, 2)
+
 
 def script_1(robot):   # Walk around the World
     # your solution here:
@@ -408,12 +419,59 @@ def script_4(robot):  # Walk around the Block
             turnRight(robot, 1)
             goForward(robot, 1)
 
-
     return # end of script_4
 
-def script_5(robot):  # Follow the Tile Path
-    # your solution here:
+def isTile(robot):
+    object = robot.scan_object_ahead().upper()
+    steps = robot.scan_steps_ahead()
+    if (object == "TILE" and steps < 1):
+        return True
+    return False
 
+def isOppositeDirection(originalDirection, curDirection):
+        if (originalDirection == "RIGHT"):
+            if (curDirection == "LEFT"):
+                return True
+        
+        if (originalDirection == "LEFT"):
+            if (curDirection == "RIGHT"):
+                return True
+            
+        if (originalDirection == "UP"):
+            if (curDirection == "DOWN"):
+                return True
+            
+        if (originalDirection == "DOWN"):
+            if (curDirection == "UP"):
+                return True
+
+def findPath(robot, originalDirection):
+    for i in range(4):
+        if (i < 3):
+            turnRight(robot, 1)
+            curDirection = robot.scan_direction()
+            checkOpps = isOppositeDirection(originalDirection, curDirection)
+            if (checkOpps):
+                pass
+            else:
+                if (isTile(robot)):
+                    return True
+        else:
+            print ("the end of the path!")
+            return False
+
+def script_5(robot):  # Follow the Tile Path
+    makeTheRobotFacingRight(robot)
+    
+    while(True):        
+        if (isTile(robot)):
+            print (robot.scan_steps_ahead())
+            goForward(robot, 1)
+        else:
+            originalDirection = robot.scan_direction()
+            if (findPath(robot, originalDirection) == False):
+                break
+            
     return # end of script_5
 
 
