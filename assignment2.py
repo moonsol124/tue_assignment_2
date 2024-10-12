@@ -310,20 +310,6 @@ def checkWallFourDirections(robot):
     # check if all items are the same
     return objects, objects.count(objects[0]) == len(objects)    
 
-# def calculateWorldSize(robot):
-#     xSize = 1
-#     ySize = 1
-#     makeTheRobotFacingUp(robot)
-#     ySize += robot.scan_steps_ahead()
-#     makeTheRobotFacingDown(robot)
-#     ySize += robot.scan_steps_ahead()
-#     makeTheRobotFacingRight(robot)
-#     xSize += robot.scan_steps_ahead()
-#     makeTheRobotFacingLeft(robot)
-#     xSize += robot.scan_steps_ahead()
-
-#     return xSize, ySize
-
 def calculateCurCoordinates(robot):
     makeTheRobotFacingLeft(robot)
     distanceLeft = robot.scan_steps_ahead() + 1
@@ -365,6 +351,8 @@ def serachAndgoToTheTile(robot):
     if (secondHalfResult == True):
         print ("found!")
         return calculateCurCoordinates(robot)
+
+    return False
 
 def script_3(robot): # Where is the Tile
     x, y = serachAndgoToTheTile(robot)
@@ -551,9 +539,28 @@ def avoidBlock(robot):
         else:
             goOneStepEitherUpOrDown(robot)
 
-def script_6(robot):  # Push the Block over the Tile
-    # your solution here:
+def findBlock(robot, steps, goDown=True):
+    if (goDown==False):
+        steps = steps + 1
 
+    index = 0
+    for step in range(steps):
+        index += 1
+        turnLeft(robot, 1)
+        isFound = goToBlock(robot, robot.scan_object_ahead().upper())
+        if (isFound):
+            return True
+        else:
+            turnRight(robot, 2)
+            isFound = goToBlock(robot, robot.scan_object_ahead().upper())
+            if (isFound):
+                return True
+            else:
+                turnLeft(robot, 1)
+                if (step != steps):
+                    goForward(robot, 1)
+
+def goToBlockScript_6(robot):
     blockFound = False
     # check if there is a block in the same column.
     # check downwards.
@@ -571,22 +578,143 @@ def script_6(robot):  # Push the Block over the Tile
     if (blockFound == False):
         makeTheRobotFacingDown(robot)
         stepsToBottom = robot.scan_steps_ahead()
-        firstHalfResult = searchBlock(robot, stepsToBottom)
+        firstHalfResult = findBlock(robot, stepsToBottom)
         if (firstHalfResult == True):
             blockFound = True
     # scan upwards   
     if (blockFound == False):
         turnRight(robot, 2)
         stepsToTop = robot.scan_steps_ahead()
-        secondHalfResult = searchBlock(robot, stepsToTop, False)
+        secondHalfResult = findBlock(robot, stepsToTop, False)
         if (secondHalfResult == True):
             blockFound = True
 
-    robot.grab_release_block()
-    goForward(robot, 1)
-    robot.step_back()
-    robot.step_back()
-    robot.step_back()
+def isFacingBlockFromRightDirection(robot, direction):
+    curDirection = robot.scan_direction()
+    turnRight(robot, 1)
+    isBlock = robot.scan_object_ahead().upper()
+    if (isBlock == "BLOCK" and direction == curDirection):
+        return True
+    turnLeft(robot, 1)
+    return False
+
+
+def putRobotInRightDirection(robot, direction):
+    maxWalkDistance = 8
+    for step in range(maxWalkDistance):
+        if (step == 0):
+            turnLeft(robot, 1)
+            goForward(robot, 1)
+            if (isFacingBlockFromRightDirection(robot, direction)):
+                break
+        elif (step%2 == 1 and step != maxWalkDistance-1):
+            turnRight(robot, 1)
+            goForward(robot, 2)
+            if (isFacingBlockFromRightDirection(robot, direction)):
+                    break
+        elif (step == maxWalkDistance-1):
+            turnRight(robot, 1)
+            goForward(robot, 1)
+            if (isFacingBlockFromRightDirection(robot, direction)):
+                break
+        
+def script_6(robot):  # Push the Block over the Tile
+    # your solution here:
+    makeTheRobotFacingDown(robot)
+    isTileFound = serachAndgoToTheTile(robot)
+    if (isTileFound == False):
+        makeTheRobotFacingDown(robot)
+        goToBlockScript_6(robot)
+        # then perform actions to drag the block...
+
+    direction = robot.scan_direction()
+    if (direction == "LEFT"):
+        goOneStepEitherUpOrDown(robot)
+        makeTheRobotFacingLeft(robot)
+        goForward(robot, 2)
+    if (direction == "RIGHT"):
+        goOneStepEitherUpOrDown(robot)
+        makeTheRobotFacingRight(robot)
+        goForward(robot, 2)
+
+    # perform another search..
+    makeTheRobotFacingDown(robot)
+    isTileFound = serachAndgoToTheTile(robot)
+
+    makeTheRobotFacingUp(robot)
+    distance = robot.scan_steps_ahead()
+    tileX = 0
+    tileY = 0
+    if (distance > 0):
+        goForward(robot, 1)
+        tileX, tileY = calculateCurCoordinates(robot)
+        tileY -= 1
+        makeTheRobotFacingDown(robot)
+        goForward(robot, 1)
+    else:
+        makeTheRobotFacingDown(robot)
+        goForward(robot, 1)
+        tileX, tileY = calculateCurCoordinates(robot)
+        tileY += 1
+        makeTheRobotFacingUp(robot)
+        goForward(robot, 1)
+    print (tileX, tileY)
+
+    # find the block...
+    goToBlockScript_6(robot)
+    robotDirectionFacingBlock = robot.scan_direction()
+    robotX = 0
+    robotY = 0
+    
+    makeTheRobotFacingUp(robot)
+    distance = robot.scan_steps_ahead()
+    if (distance > 0):
+        goForward(robot, 1)
+        robotX, robotY = calculateCurCoordinates(robot)
+        robotY -= 1
+        makeTheRobotFacingDown(robot)
+        goForward(robot, 1)
+        if (robotDirectionFacingBlock == "RIGHT"):
+            makeTheRobotFacingRight(robot)
+        else:
+            makeTheRobotFacingLeft(robot)
+    else:
+        makeTheRobotFacingDown(robot)
+        goForward(robot, 1)
+        robotX, robotY = calculateCurCoordinates(robot)
+        robotY += 1
+        makeTheRobotFacingUp(robot)
+        goForward(robot, 1)
+        if (robotDirectionFacingBlock == "RIGHT"):
+            makeTheRobotFacingRight(robot)
+        else:
+            makeTheRobotFacingLeft(robot)
+
+    blockX = robotX
+    blockY = robotY
+    if (robotDirectionFacingBlock == 'RIGHT'):
+        blockX += 1
+    if (robotDirectionFacingBlock == 'LEFT'):
+        blockX -= 1
+    if (robotDirectionFacingBlock == 'UP'):
+        blockY += 1
+    if (robotDirectionFacingBlock == 'DOWN'):
+        blockY -= 1
+    print (blockX, blockY)    
+
+    # x axis first
+    # if (tileX < blockX):
+
+    #     putRobotInRightDirection(robot, )
+
+    #     # put the robot to the left of the block.
+    # if (tileX > blockX):
+        # put the robot the right of the block
+    # robot.grab_release_block()
+    # goForward(robot, 1)
+    # robot.step_back()
+    # robot.step_back()
+    # robot.step_back()
 
     # there is always a tile
     # if you can't find a block then move horizontally to find it
